@@ -3,10 +3,14 @@ package com.example.dynamobankservice.exceptions;
 import com.example.dynamobankservice.domains.AppResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.client.HttpServerErrorException;
+
+import java.util.Locale;
 
 @Slf4j
 @ControllerAdvice
@@ -26,6 +30,24 @@ public class ExceptionHandlers {
     public AppResponse notFoundException(final NotFoundException ex) {
         log.error("Not found error: {} ", ex.getMessage());
         return new AppResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage(),
+                ex.getMessage(), null, ex.getMessage());
+    }
+
+    @ExceptionHandler(HttpServerErrorException.InternalServerError.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public AppResponse internalServerError(final HttpServerErrorException.InternalServerError ex) {
+        log.error("Internal server error: {} ", ex.getMessage());
+        return new AppResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Looks like we are having some issues. Please try again later",
+                ex.getMessage(), null, ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public AppResponse handleExceptions(Exception ex) {
+        log.error("Error: {} ", ex.getMessage());
+        return new AppResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Something went wrong. Please try again later",
                 ex.getMessage(), null, ex.getMessage());
     }
 

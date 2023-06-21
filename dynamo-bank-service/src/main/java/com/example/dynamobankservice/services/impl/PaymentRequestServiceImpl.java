@@ -26,7 +26,7 @@ public class PaymentRequestServiceImpl implements PaymentRequestService {
     public AppResponse createPaymentRequest(PaymentRequestDTO requestDto) {
         PaymentRequest paymentRequest = PaymentRequestHelper.convertToPaymentRequest(requestDto);
         Random random = new Random();
-        String accountNumber= String.valueOf(random.nextInt(1000000));
+        String accountNumber= String.valueOf(random.nextInt(Integer.MAX_VALUE));
         paymentRequest.setAccountNumber(accountNumber);
         PaymentRequest savedPaymentRequest = paymentRepository.save(paymentRequest);
         return new AppResponse(HttpStatus.OK.value(), "Account created successfully", "Account number generated",
