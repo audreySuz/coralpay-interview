@@ -12,10 +12,12 @@ import com.example.surepayservice.models.AccountType;
 import com.example.surepayservice.models.Merchant;
 import com.example.surepayservice.repositories.MerchantRepository;
 import com.example.surepayservice.repositories.VirtualAccountRepository;
+import com.example.surepayservice.security.MerchantAuthentication;
 import com.example.surepayservice.services.AccountService;
 import com.example.surepayservice.services.impl.AccountServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -48,7 +50,9 @@ class AccountServiceTest {
     void generateAccount_ShouldCallServiceWithRequestDto() {
         //subs
         when(dynamoBank.createBankAccount(any())).thenReturn(generateTestpaymetResponse());
-        when(merchantRepository.findByMerchantCode(anyString())).thenReturn(Optional.of(generateTestMerchant()));
+        Merchant merchant = generateTestMerchant();
+        SecurityContextHolder.getContext().setAuthentication(new MerchantAuthentication(merchant));
+        when(merchantRepository.findByMerchantCode(anyString())).thenReturn(Optional.of(merchant));
         when(virtualAccountRepository.save(any())).then(invocation -> invocation.getArgument(0));
 
         //given
@@ -58,7 +62,6 @@ class AccountServiceTest {
                 .lastName("Doe")
                 .email("john.doe@example.com")
                 .phone("1234567890")
-                .merchantCode("M123")
                 .callBackUrl("https://example.com/callback")
                 .paymentType(PaymentType.PWT)
                 .build();
@@ -142,18 +145,14 @@ class AccountServiceTest {
     void generateAccount_WhenMerchantNotFound_ShouldThrowNotFoundException() {
         // Create a sample AccountRequest
         AccountRequest requestDto = AccountRequest.builder()
-                // Set the necessary fields
                 .build();
         when(dynamoBank.createBankAccount(any())).thenReturn(generateTestpaymetResponse());
         when(merchantRepository.findByMerchantCode(anyString())).thenReturn(Optional.of(generateTestMerchant()));
         when(virtualAccountRepository.save(any())).then(arg -> arg.getArgument(0));
-        // Mock the behavior of the MerchantRepository to return an empty optional
-        when(merchantRepository.findByMerchantCode(requestDto.getMerchantCode()))
+        when(merchantRepository.findByMerchantCode(any()))
                 .thenReturn(Optional.empty());
 
-        // Assertions
         assertThrows(NotFoundException.class, () -> accountService.generateAccount(requestDto));
-        // Additional assertions if needed
     }
 
 }
