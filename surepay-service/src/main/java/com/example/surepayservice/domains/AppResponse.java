@@ -2,6 +2,7 @@ package com.example.surepayservice.domains;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.http.HttpStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(
@@ -20,6 +21,16 @@ public class AppResponse {
         this.supportDescriptiveMessage = supportDescriptiveMessage;
         this.data = data;
         this.error = error;
+    }
+
+    public AppResponse(int status, String message, Object data) {
+        this.status = status;
+        this.message = message;
+        this.data = data;
+    }
+
+    public  static AppResponse ok(String message, Object data){
+        return new AppResponse(HttpStatus.OK.value(), message, data);
     }
 
     public AppResponse() {

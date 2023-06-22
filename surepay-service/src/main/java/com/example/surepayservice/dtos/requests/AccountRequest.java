@@ -11,7 +11,6 @@ public class AccountRequest {
         private String amount;
         private String firstName;
         private String lastName;
-        private String merchantCode;
         private String phone;
         private String email;
         private String callBackUrl;

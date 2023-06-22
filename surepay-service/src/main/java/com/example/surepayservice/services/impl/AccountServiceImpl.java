@@ -1,34 +1,29 @@
 package com.example.surepayservice.services.impl;
 
 import com.example.surepayservice.clients.BankClient;
-import com.example.surepayservice.clients.impl.DynamoBankClient;
 import com.example.surepayservice.domains.AppResponse;
 import com.example.surepayservice.dtos.requests.AccountRequest;
 import com.example.surepayservice.dtos.requests.PaymentRequestDTO;
 import com.example.surepayservice.dtos.responses.PaymentResponseDTO;
 import com.example.surepayservice.enums.Bank;
-import com.example.surepayservice.enums.Status;
 import com.example.surepayservice.exceptions.NotFoundException;
 import com.example.surepayservice.helpers.AccountServiceHelper;
 import com.example.surepayservice.models.Customer;
 import com.example.surepayservice.models.Merchant;
 import com.example.surepayservice.models.VirtualAccount;
-import com.example.surepayservice.repositories.CustomerRepository;
 import com.example.surepayservice.repositories.MerchantRepository;
 import com.example.surepayservice.repositories.VirtualAccountRepository;
 import com.example.surepayservice.services.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -44,7 +39,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AppResponse generateAccount(AccountRequest requestDto) {
         String reference = generateReferenceNumber();
-        Optional<Merchant> merchantOptional = merchantRepository.findMerchantByMerchantCode(requestDto.getMerchantCode());
+        //get merchant from seccurity context
+        Merchant merchant = (Merchant) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Merchant> merchantOptional = merchantRepository.findByMerchantCode(merchant.getMerchantCode());
         if (!merchantOptional.isPresent()) {
             throw new NotFoundException("Merchant Not Found");
         }

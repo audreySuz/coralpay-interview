@@ -48,7 +48,7 @@ class AccountServiceTest {
     void generateAccount_ShouldCallServiceWithRequestDto() {
         //subs
         when(dynamoBank.createBankAccount(any())).thenReturn(generateTestpaymetResponse());
-        when(merchantRepository.findMerchantByMerchantCode(anyString())).thenReturn(Optional.of(generateTestMerchant()));
+        when(merchantRepository.findByMerchantCode(anyString())).thenReturn(Optional.of(generateTestMerchant()));
         when(virtualAccountRepository.save(any())).then(invocation -> invocation.getArgument(0));
 
         //given
@@ -145,10 +145,10 @@ class AccountServiceTest {
                 // Set the necessary fields
                 .build();
         when(dynamoBank.createBankAccount(any())).thenReturn(generateTestpaymetResponse());
-        when(merchantRepository.findMerchantByMerchantCode(anyString())).thenReturn(Optional.of(generateTestMerchant()));
+        when(merchantRepository.findByMerchantCode(anyString())).thenReturn(Optional.of(generateTestMerchant()));
         when(virtualAccountRepository.save(any())).then(arg -> arg.getArgument(0));
         // Mock the behavior of the MerchantRepository to return an empty optional
-        when(merchantRepository.findMerchantByMerchantCode(requestDto.getMerchantCode()))
+        when(merchantRepository.findByMerchantCode(requestDto.getMerchantCode()))
                 .thenReturn(Optional.empty());
 
         // Assertions
